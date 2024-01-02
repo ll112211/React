@@ -8,7 +8,7 @@ const pkgPath = path.resolve(__dirname, '../../packages');
 const distPath = path.resolve(__dirname, '../../dist/node_modules');
 
 const getBaseRollupPlugin = ({
-	alias = { __DEV__: true },
+	alias = { __DEV__: true, preventAssignment: true },
 	typescript = {}
 } = {}) => [replace(alias), commonjs(), ts(typescript)];
 
