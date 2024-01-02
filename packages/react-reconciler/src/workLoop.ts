@@ -1,21 +1,53 @@
 import { beginWork } from './beginWorks';
 import { completeWork } from './completeWork';
-import { FiberNode } from './fiber';
+import { FiberNode, FiberRootNode, createWorkInprogress } from './fiber';
+import { HostRoot } from './workTags';
 
-// 全局指针来表达正在工作的FiberNode
+// 全局指针来表达正在工作的 FiberNode
 let workInPropgress: FiberNode | null = null;
 
 /***
- * @description 将WorkInPropgress指向第一个FiberNode
+ * @description 将 WorkInPropgress 指向第一个FiberNode
  * */
-function prepareFreshStack(fiber: FiberNode) {
-	workInPropgress = xxx;
+
+function prepareFreshStack(root: FiberRootNode) {
+	workInPropgress = createWorkInprogress(root.current, {});
+}
+
+/**
+ * @description 将 creatContainer 和 render 连接
+ */
+
+export function scheduleUpdateOnFiber(fiber: FiberNode) {
+	// TODO 调度功能
+	const root = markUpdateFromFiberToRoot(fiber); //fiberRootNode
+	renderRoot(root);
+}
+
+/**
+ * @description 从当前的fiber一直向上遍历到根节点
+ * */
+
+function markUpdateFromFiberToRoot(fiber: FiberNode) {
+	let node = fiber;
+	let parent = node.return;
+	while (parent !== null) {
+		//如果跳出循环 那么就到了hostRootFiber
+		node = parent;
+		parent = node.return;
+	}
+	if (node.tag === HostRoot) {
+		node.stateNode;
+		return node.stateNode;
+	}
+	return null;
 }
 
 /***
  * @description 初始化 完成后执行递归的流程
  **/
-function renderRoot(root: FiberNode) {
+
+function renderRoot(root: FiberRootNode) {
 	/***
 	 *  谁会调用此方法？
 	 *      常见的触发更新的方式
@@ -33,7 +65,10 @@ function renderRoot(root: FiberNode) {
 			workLoop();
 			break;
 		} catch (e) {
-			console.warn('workLoop发生错误', e);
+			if (__DEV__) {
+				console.warn('workLoop发生错误', e);
+			}
+
 			workInPropgress = null; //抓到错误重置 WorkInPropgress
 		}
 	} while (true);
