@@ -5,7 +5,12 @@ import {
 	createTextInstance
 } from 'hostConfig';
 import { FiberNode } from './fiber';
-import { HostComponets, HostRoot, HostText } from './workTags';
+import {
+	FunctionComponent,
+	HostComponets,
+	HostRoot,
+	HostText
+} from './workTags';
 import { NoFlags } from './fiberFlags';
 
 // 递归中的归
@@ -27,6 +32,7 @@ export const completeWork = (wip: FiberNode) => {
 				appendAllChildren(instance, wip);
 				wip.stateNode = instance;
 			}
+			bubbleProperties(wip);
 			return null;
 		case HostText:
 			if (current !== null && wip.stateNode) {
@@ -40,8 +46,13 @@ export const completeWork = (wip: FiberNode) => {
 				const instance = createTextInstance(newProps.content); //构建DOM
 				wip.stateNode = instance;
 			}
+			bubbleProperties(wip);
 			return null;
 		case HostRoot:
+			bubbleProperties(wip);
+			return null;
+		case FunctionComponent:
+			bubbleProperties(wip);
 			return null;
 		default:
 			if (__DEV__) {

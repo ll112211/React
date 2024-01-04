@@ -63,13 +63,13 @@ export class FiberNode {
 export class FiberRootNode {
 	container: Container; // 保存宿主环境挂在的节点
 	current: FiberNode;
-	finisheWork: FiberNode | null; //更新完成以后的hostRootFiber
+	finishedWork: FiberNode | null; //更新完成以后的hostRootFiber
 
 	constructor(container: Container, hostRootFiber: FiberNode) {
 		this.container = container;
 		this.current = hostRootFiber;
 		hostRootFiber.stateNode = this;
-		this.finisheWork = null;
+		this.finishedWork = null;
 	}
 }
 

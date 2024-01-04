@@ -26,6 +26,8 @@ export function updateContainer(
 	element: ReactElement | null,
 	root: FiberRootNode
 ) {
+	console.log('执行了', __DEV__, root);
+
 	const hostRootFiber = root.current;
 	const update = createUpdate<ReactElement | null>(element);
 

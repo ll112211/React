@@ -31,6 +31,7 @@ export function scheduleUpdateOnFiber(fiber: FiberNode) {
 	// TODO 调度功能
 	const root = markUpdateFromFiberToRoot(fiber); //fiberRootNode
 	renderRoot(root);
+	console.log(root);
 }
 
 /**
@@ -81,9 +82,8 @@ function renderRoot(root: FiberRootNode) {
 			workInPropgress = null; //抓到错误重置 WorkInPropgress
 		}
 	} while (true);
-
-	const finisheWork = root.current.alternate;
-	root.finisheWork = finisheWork;
+	const finishedWork = root.current.alternate;
+	root.finishedWork = finishedWork;
 	commitRoot(root);
 }
 
@@ -98,8 +98,8 @@ function commitRoot(root: FiberRootNode) {
 	 *  	- fiber树切换
 	 * 		- 执行placeme对应操作
 	 * */
-	const finisheWork = root.finisheWork;
-	if (finisheWork === null) {
+	const finishedWork = root.finishedWork;
+	if (finishedWork === null) {
 		return;
 	}
 	if (__DEV__) {
@@ -107,22 +107,22 @@ function commitRoot(root: FiberRootNode) {
 	}
 
 	// 重置操作
-	root.finisheWork = null; // 已经被 finisheWork 保存了
+	root.finishedWork = null; // 已经被 finishedWork 保存了
 
 	// 判断三个子阶段 是否存在三个子阶段执行的操作
 
 	// 判断两个flags  root本身的flags root的subTreeFlags(冒泡上去的tree)
 	const subTreeHasEffect =
-		(finisheWork.subTreeFlags & mutationMask) !== NoFlags;
-	const rootHasEffect = (finisheWork.flags & mutationMask) !== NoFlags;
+		(finishedWork.subTreeFlags & mutationMask) !== NoFlags;
+	const rootHasEffect = (finishedWork.flags & mutationMask) !== NoFlags;
 	if (subTreeHasEffect || rootHasEffect) {
 		// beforMutation
 		// mutation placement
-		commitMutationEffects(finisheWork);
-		root.current = finisheWork;
+		commitMutationEffects(finishedWork);
+		root.current = finishedWork;
 		// layout
 	} else {
-		root.current = finisheWork;
+		root.current = finishedWork;
 	}
 }
 

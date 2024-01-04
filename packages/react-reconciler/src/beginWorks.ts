@@ -3,8 +3,14 @@
 import { ReactElement } from 'shared/ReactType';
 import { FiberNode } from './fiber';
 import { UpdateQueue, processUpdateQueue } from './updateQueue';
-import { HostComponets, HostRoot, HostText } from './workTags';
+import {
+	FunctionComponent,
+	HostComponets,
+	HostRoot,
+	HostText
+} from './workTags';
 import { mountChildFibers, reconcilerChildFibers } from './childFibers';
+import { renderWithHooks } from './fiberHooks';
 
 /**
  *   比较
@@ -18,6 +24,8 @@ export const beginWork = (wip: FiberNode) => {
 			return updateHostComponent(wip);
 		case HostText:
 			return null;
+		case FunctionComponent:
+			return updateFuncitonComponent(wip);
 		default:
 			if (__DEV__) {
 				console.warn('beginWork为实现的类型');
@@ -25,6 +33,12 @@ export const beginWork = (wip: FiberNode) => {
 			break;
 	}
 };
+
+function updateFuncitonComponent(wip: FiberNode) {
+	const nextChildren = renderWithHooks(wip);
+	reconcileChildren(wip, nextChildren);
+	return wip.child;
+}
 
 /**
  *  计算状态的最新值 创造子fiberNode

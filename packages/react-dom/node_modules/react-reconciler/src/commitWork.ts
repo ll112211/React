@@ -2,43 +2,45 @@ import { Container, appendChildToContainer } from 'hostConfig';
 import { FiberNode, FiberRootNode } from './fiber';
 import { NoFlags, Placment, mutationMask } from './fiberFlags';
 import { HostComponets, HostRoot, HostText } from './workTags';
-let nestEffect: FiberNode | null = null;
-export const commitMutationEffects = (finisheWork: FiberNode) => {
-	nestEffect = finisheWork;
+let nextEffect: FiberNode | null = null;
+export const commitMutationEffects = (finishedWork: FiberNode) => {
+	nextEffect = finishedWork;
+	console.log(nextEffect, 'nextEffect');
+
 	/**
 	 *  依据subTreeFlags
 	 *  用递归从根节点往下找
 	 */
-	while (nestEffect !== null) {
+	while (nextEffect !== null) {
 		// 向下遍历
-		const child: FiberNode | null = nestEffect.child;
+		const child: FiberNode | null = nextEffect.child;
 		if (
-			(nestEffect.subTreeFlags & mutationMask) !== NoFlags &&
+			(nextEffect.subTreeFlags & mutationMask) !== NoFlags &&
 			child !== null
 		) {
-			nestEffect = child;
+			nextEffect = child;
 		} else {
 			// 向上遍历
-			up: while (nestEffect !== null) {
-				const sibling: FiberNode | null = nestEffect.sibling;
-				commitMutationEffectsOnFiber(nestEffect);
+			up: while (nextEffect !== null) {
+				const sibling: FiberNode | null = nextEffect.sibling;
+				commitMutationEffectsOnFiber(nextEffect);
 				if (sibling !== null) {
-					nestEffect = sibling;
+					nextEffect = sibling;
 					break up;
 				}
-				nestEffect = nestEffect.return;
+				nextEffect = nextEffect.return;
 			}
 		}
 	}
 };
 
-function commitMutationEffectsOnFiber(finisheWork: FiberNode) {
-	// 执行到这里说明finisheWork 存在真正需要执行的flags
-	const flags = finisheWork.flags;
+function commitMutationEffectsOnFiber(finishedWork: FiberNode) {
+	// 执行到这里说明finishedWork 存在真正需要执行的flags
+	const flags = finishedWork.flags;
 	// flags placement
 	if ((flags & Placment) !== NoFlags) {
-		commitPlacement(finisheWork);
-		finisheWork.flags &= ~Placment;
+		commitPlacement(finishedWork);
+		finishedWork.flags &= ~Placment;
 	}
 	// flags update
 
@@ -49,15 +51,15 @@ function commitMutationEffectsOnFiber(finisheWork: FiberNode) {
  * @description :执行插入
  */
 
-const commitPlacement = (finisheWork: FiberNode) => {
+const commitPlacement = (finishedWork: FiberNode) => {
 	if (__DEV__) {
-		console.warn('执行placeme对应操作', finisheWork);
+		console.warn('执行placeme对应操作', finishedWork);
 	}
 	// parent Dom
-	const hostParent = getHostParent(finisheWork);
+	const hostParent = getHostParent(finishedWork);
 	// finishedWork  dom append parent Dom
 	if (hostParent !== null) {
-		appendPlacementNodeIntoContainer(finisheWork, hostParent);
+		appendPlacementNodeIntoContainer(finishedWork, hostParent);
 	}
 };
 
